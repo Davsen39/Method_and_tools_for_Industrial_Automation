@@ -54,11 +54,10 @@ title("4sen(2t+10)");
 legend('originale','disturbato');
 
 
-%% grafico a mano
+%% grafico libero a mano
 tempo=0:campionamento:orizzonte;
 Y = zeros(2,dimensione);
 X = zeros(2,dimensione);
-U = zeros(2,dimensione-1);
 X(:,1) = [0 1]';
 
 for t=1:dimensione-1
@@ -77,3 +76,27 @@ subplot(2,1,2);
 stairs(tempo(1,:),Y(2,:));
 title('y2');
 
+
+%% grafico controllato a mano
+tempo=0:campionamento:orizzonte;
+Y = zeros(2,dimensione);
+X = zeros(2,dimensione);
+U = zeros(1,dimensione-1);
+X(:,1) = [0 1]';
+
+for t=1:dimensione-1
+    U(:,t)= -K*X(:,t);
+    Y(:,t) = C*X(:,t);
+    X(:,t+1) = Ad*X(:,t)+Bd*U(:,t);
+end
+Y(:,dimensione) = C*X(:,dimensione);
+figure(5);
+subplot(2,1,1);
+%y=interp1(Y(1,:),tempo);
+stairs(tempo(1,:),Y(1,:));
+title('y1 controllato');
+
+subplot(2,1,2);
+%y=interp1(Y(2,:),tempo);
+stairs(tempo(1,:),Y(2,:));
+title('y2 controllato');
