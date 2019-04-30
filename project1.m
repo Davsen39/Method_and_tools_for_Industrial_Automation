@@ -56,24 +56,24 @@ legend('originale','disturbato');
 
 %% grafico a mano
 tempo=0:campionamento:orizzonte;
-Y = zeros(2,orizzonte+1);
-X = zeros(2,orizzonte+1);
-U = zeros(2,orizzonte);
+Y = zeros(2,dimensione);
+X = zeros(2,dimensione);
+U = zeros(2,dimensione-1);
 X(:,1) = [0 1]';
 
-for i=1:orizzonte
-    Y(:,i) = C*X(:,i);
-    X(:,i+1) = (Ad-Bd*K)*X(:,i);
+for t=1:dimensione-1
+    Y(:,t) = C*X(:,t);
+    X(:,t+1) = Ad*X(:,t);
 end
-Y(:,orizzonte+1) = C*X(:,orizzonte+1);
+Y(:,dimensione) = C*X(:,dimensione);
 figure(4);
 subplot(2,1,1);
-y=interp1(Y(1,:),tempo);
-stairs(tempo(1,:),y);
+%y=interp1(Y(1,:),tempo);
+stairs(tempo(1,:),Y(1,:));
 title('y1');
 
 subplot(2,1,2);
-y=interp1(Y(2,:),tempo);
-stairs(tempo(1,:),y);
+%y=interp1(Y(2,:),tempo);
+stairs(tempo(1,:),Y(2,:));
 title('y2');
 
