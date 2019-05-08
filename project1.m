@@ -36,7 +36,8 @@ initial(sysd_chiuso,x0,orizzonte);
 
 
 %% seno
-x = 1:0.1:10;
+x = 1:0.1:11;
+t = 0:0.1:10;
 y = zeros(1,length(x));
 y_disturbato = zeros(1,length(x));
 media=0;
@@ -49,7 +50,7 @@ for i=1:length(x)
 end
 
 figure(3);
-plot(x,y,x,y_disturbato);
+plot(t,y,t,y_disturbato);
 title("4sen(2t+10)");
 legend('originale','disturbato');
 
@@ -100,3 +101,67 @@ subplot(2,1,2);
 %y=interp1(Y(2,:),tempo);
 stairs(tempo(1,:),Y(2,:));
 title('y2 controllato');
+
+
+%% LQT di z fisso
+tempo=0:campionamento:orizzonte;
+Y = zeros(2,dimensione);
+X = zeros(2,dimensione);
+U = zeros(1,dimensione-1);
+X(:,1) = [0 1]';
+Zbase = [1,2]';
+Z = ones(2,dimensione).*Zbase;
+Q(1,1)=0.001;
+Q(2,2)=0.18;
+[K,G,Lg] = Riccati_K_G(A,B,C,Q,Qf,R,tempo-1,Z);
+for t=1:dimensione-1
+    U(:,t)= K(:,:,t)*X(:,t)+Lg(:,:,t)*G(:,:,t+1);
+    Y(:,t) = C*X(:,t);
+    X(:,t+1) = Ad*X(:,t)+Bd*U(:,t);
+end
+Y(:,dimensione) = C*X(:,dimensione);
+figure(5);
+subplot(2,1,1);
+stairs(tempo(1,:),Y(1,:));
+title('y1 tracking verso z(1)=1');
+
+subplot(2,1,2);
+stairs(tempo(1,:),Y(2,:));
+title('y2 tracking verso z(2)=2');  
+
+
+%% LQT di z variabile
+tempo=0:campionamento:orizzonte;
+Y = zeros(2,dimensione);
+X = zeros(2,dimensione);
+U = zeros(1,dimensione-1);
+X(:,1) = [0 1]';
+
+Z = ones(2,dimensione);
+for t=1:dimensione-1
+    Z(:,t)=Z(:,t).*y(:,t);
+end
+
+Q(1,1)=0.001;
+Q(2,2)=0.00001;
+[K,G,Lg] = Riccati_K_G(A,B,C,Q,Qf,R,tempo-1,Z);
+for t=1:dimensione-1
+    U(:,t)= K(:,:,t)*X(:,t)+Lg(:,:,t)*G(:,:,t+1);
+    Y(:,t) = C*X(:,t);
+    X(:,t+1) = Ad*X(:,t)+Bd*U(:,t);
+end
+Y(:,dimensione) = C*X(:,dimensione);
+figure(6);
+subplot(3,1,1);
+stairs(tempo(1,:),Y(1,:));
+title('y1 tracking verso 4sen(2t+10)');
+
+subplot(3,1,2);
+stairs(tempo(1,:),Y(2,:));
+title('y2 tracking verso 4sen(2t+10)');  
+
+subplot(3,1,3);
+stairs(tempo(1,:),y(1,:));
+title('4sen(2t+10)'); 
+
+
