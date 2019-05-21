@@ -1,0 +1,66 @@
+clear;
+clc;
+
+%% Parametri del sistema da simulare
+orizzonte=10;
+campionamento=0.1;
+dimensione=(orizzonte/campionamento)+1;
+tempo=0:campionamento:orizzonte;
+x0=[0 1]';
+A=[0 1; -1 0];
+B=[0 1]';
+C=[0 1
+   0 0];
+%C=eye(2);
+D=0;
+sys = ss(A,B,C,D);
+sysd = c2d(sys,campionamento);
+Ad=sysd.A;
+Bd=sysd.B;
+
+%% seno
+x=1:campionamento:orizzonte+1;
+y = zeros(1,length(x));
+for i=1:length(x)
+    y(i) = 4*sin(2*x(i)+10);
+end
+
+
+%% avanzamento di stato
+Y = zeros(2,dimensione);
+X = zeros(2,dimensione);
+Z = ones(2,dimensione);
+U = zeros(1,dimensione);
+X(:,1) = x0;
+
+for t=1:dimensione-1
+    Z(:,t)=Z(:,t).*y(t);
+ %   Z(:,t)=[10 50]';
+end
+
+R=0.01;
+Q(1,1)=50;
+Q(2,2)=10;
+Qf=Q;
+[K,G,Lg] = Riccati_K_G(Ad,Bd,C,Q,Qf,R,tempo-1,Z);
+
+
+for t=1:dimensione-1
+    Y(:,t) = C*X(:,t);
+    U(:,t) = K(:,:,t)*X(:,t)+Lg(:,:,t)*G(:,:,t+1);
+    X(:,t+1) = Ad*X(:,t)+Bd*U(:,t);
+end
+Y(:,dimensione) = C*X(:,dimensione);
+
+figure(4);
+subplot(3,1,1);
+plot(tempo,y(:));
+title("segnale di riferimento 4sen(2t+10)");
+subplot(3,1,2);
+stairs(tempo,X(1,:));
+title('X1');
+subplot(3,1,3);
+stairs(tempo,X(2,:));
+title('X2');
+
+
