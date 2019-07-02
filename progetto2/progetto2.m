@@ -12,6 +12,7 @@ d=xlsread("progetto2.xlsx","sheet1",strcat("E3:",alphabet(5+num_job),"3"))';
 w=xlsread("progetto2.xlsx","sheet1",strcat("E4:",alphabet(5+num_job),"4"))';
 constraints=xlsread("progetto2.xlsx","sheet1",strcat("A5:B",num2str(5+num_constraints)));
 
+
 X0=0;
 
 for i=1:num_job 
@@ -30,18 +31,19 @@ for k=num_job-1:-1:1
     for i=1:stati(k)
         start_time=durata(X{k}(i,:),p); % somma di processing time del set scelto
         for j=1:stati(k+1)
-            if ismember(X{k}(i,:),X{k+1}(j,:)) % se è subset?
-                controllo(i,j)=setdiff(X{k+1}(j,:),X{k}(i,:)); % elemento aggiuntivo nello stadio successivo
-                G{k}(i,j)=Go{k+1}(j)+max((start_time+p(controllo(i,j))-d(controllo(i,j)))/num_job,0);
+            if ismember(X{k}(i,:),X{k+1}(j,:))  % se è subset?
+                if(respect_constraints(X{k}(i,:),X{k+1}(j,:),constraints))
+                    controllo(i,j)=setdiff(X{k+1}(j,:),X{k}(i,:)); % elemento aggiuntivo nello stadio successivo
+                    G{k}(i,j)=Go{k+1}(j)+w(controllo(i,j))*max((start_time+p(controllo(i,j))-d(controllo(i,j))),0);
+                end
             end
         end
         Go{k}(i)=min(G{k}(i,:));
     end
 end
-
 %passo 0;
 for i=1:length(J)
-    G0(i)=Go{1}(i)+max((p(X{1}(i))-d(X{1}(i)))/num_job, 0);
+    G0(i)=Go{1}(i)+w(X{1}(i))*max((p(X{1}(i))-d(X{1}(i))), 0);
 end
 
 Go0=min(G0);
