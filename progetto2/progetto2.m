@@ -75,6 +75,10 @@ for stadio=ordered_job
     ritardo_totale_pesato = ritardo_totale_pesato + max(processing_time_totale - d(stadio),0)*w(stadio);
 end
 
+xlswrite("progetto2.xlsx",ordered_job,sheet,strcat("E27:",alphabet(start_value+num_job),"27"));
+xlswrite("progetto2.xlsx",ritardo_totale,sheet,strcat("F28"));
+xlswrite("progetto2.xlsx",ritardo_totale_pesato,sheet,strcat("J28"));
+
 ordered_job
 ritardo_totale
 ritardo_totale_pesato
